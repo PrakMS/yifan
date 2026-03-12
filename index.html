@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QC二阶段积分展示系统（Netlify版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        .card {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+            height: 100%;
+            position: relative;
+            padding-top: 30px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .excellent-card {
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+        .excellent-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ffd700;
+            color: #1a1a2e;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .student-list {
+            max-height: 350px;
+            overflow-y: auto;
+            margin: 15px 0;
+            padding-right: 8px;
+        }
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+        }
+        .student-name {
+            flex: 2;
+            text-align: left;
+        }
+        .student-scores {
+            display: flex;
+            flex: 4;
+            justify-content: space-around;
+        }
+        .score-item {
+            width: 40px;
+            text-align: center;
+        }
+        .group-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+        .rule-card {
+            background-color: #2d2d44;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .excellent-section {
+            background: linear-gradient(135deg, #2d2d44 0%, #3a3a5c 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 40px 0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .excellent-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.8);
+        }
+        .refresh-btn {
+            background-color: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 auto 20px;
+            display: block;
+            box-shadow: 0 4px 8px rgba(255,215,0,0.3);
+        }
+        .refresh-btn:hover {
+            background-color: #f5e050;
+            transform: translateY(-2px);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,215,0,0.5);
+            border-radius: 3px;
+        }
+        /* 新增优秀个人样式 */
+        .excellent-person-section {
+            background: linear-gradient(135deg, #2d2d44 0%, #3a3a5c 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 40px 0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .excellent-person-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .excellent-person-item {
+            background: rgba(255,215,0,0.1);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 12px 20px;
+            min-width: 180px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 8px rgba(255,215,0,0.2);
+        }
+        .person-score {
+            color: #ffd700;
+            margin-left: 8px;
+        }
+        .person-group {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container max-w-7xl mx-auto">
+        <h1 class="text-4xl font-bold text-center mb-6 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            陈老师的二等兵们之QC2积分展示
+        </h1>
+        <p class="text-center text-lg text-gray-300 mb-4">奋勇争先</p>
+        
+        <!-- 刷新按钮 -->
+        <button class="refresh-btn" onclick="loadData()"><i class="fa fa-refresh mr-2"></i>刷新最新积分数据</button>
+
+        <div class="rule-card">
+            <h2 class="text-2xl font-bold mb-3"><i class="fa fa-bullhorn mr-2 text-yellow-400"></i>积分规则公告</h2>
+            <ul class="list-disc pl-6 space-y-2 text-lg">
+                <li>每周按时完成课程，个人积分 +1</li>
+                <li>每周按时提交作业，个人积分 +1</li>
+                <li>每周按时分享笔记，个人积分 +1</li>
+                <li>个人得分 = 课程完成 + 作业提交 + 笔记分享</li>
+                <li>小组总分 = 组内所有学生的个人得分之和</li>
+                <li>积分排名前三的小组将评为「优秀小组」</li>
+                <li>个人积分排名前5（含同分）将评为「优秀个人」</li>
+            </ul>
+        </div>
+
+        <!-- 新增优秀个人展示区域 -->
+        <div class="excellent-person-section">
+            <h2 class="excellent-title"><i class="fa fa-user-circle mr-3"></i>优秀个人表彰</h2>
+            <p class="text-lg text-gray-200 mb-4">根据个人积分排名，以下同学荣获本期优秀个人称号！</p>
+            <div id="excellentPersonList" class="excellent-person-list">
+                <div class="excellent-person-item">
+                    数据加载中...
+                </div>
+            </div>
+        </div>
+
+        <div class="excellent-section">
+            <h2 class="excellent-title"><i class="fa fa-trophy mr-3"></i>优秀小组表彰</h2>
+            <p class="text-lg text-gray-200 mb-4">根据积分排名，以下小组荣获本期优秀小组称号！</p>
+            <div id="excellentList" class="excellent-list flex flex-wrap justify-center gap-20 mt-20">
+                <div class="excellent-item bg-rgba(255,215,0,0.1) border-2 border-yellow-400 rounded-lg px-8 py-4 text-xl font-bold text-white min-w-[120px]">
+                    数据加载中...
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="groupCards">
+            <div class="card bg-gradient-to-br from-pink-400 to-purple-600" id="group1">
+                <h3 class="text-xl font-bold mb-4">一组</h3>
+                <div class="student-list" id="studentList1"></div>
+                <div class="group-total">小组总分：<span id="groupTotal1">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-cyan-400 to-blue-600" id="group2">
+                <h3 class="text-xl font-bold mb-4">二组</h3>
+                <div class="student-list" id="studentList2"></div>
+                <div class="group-total">小组总分：<span id="groupTotal2">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-amber-400 to-orange-600" id="group3">
+                <h3 class="text-xl font-bold mb-4">三组</h3>
+                <div class="student-list" id="studentList3"></div>
+                <div class="group-total">小组总分：<span id="groupTotal3">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-emerald-400 to-teal-600" id="group4">
+                <h3 class="text-xl font-bold mb-4">四组</h3>
+                <div class="student-list" id="studentList4"></div>
+                <div class="group-total">小组总分：<span id="groupTotal4">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-purple-400 to-indigo-600" id="group5">
+                <h3 class="text-xl font-bold mb-4">五组</h3>
+                <div class="student-list" id="studentList5"></div>
+                <div class="group-total">小组总分：<span id="groupTotal5">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-rose-400 to-pink-600" id="group6">
+                <h3 class="text-xl font-bold mb-4">六组</h3>
+                <div class="student-list" id="studentList6"></div>
+                <div class="group-total">小组总分：<span id="groupTotal6">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-blue-400 to-violet-600" id="group7">
+                <h3 class="text-xl font-bold mb-4">七组</h3>
+                <div class="student-list" id="studentList7"></div>
+                <div class="group-total">小组总分：<span id="groupTotal7">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-cyan-400 to-teal-600" id="group8">
+                <h3 class="text-xl font-bold mb-4">八组</h3>
+                <div class="student-list" id="studentList8"></div>
+                <div class="group-total">小组总分：<span id="groupTotal8">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-orange-400 to-red-600" id="group9">
+                <h3 class="text-xl font-bold mb-4">九组</h3>
+                <div class="student-list" id="studentList9"></div>
+                <div class="group-total">小组总分：<span id="groupTotal9">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-lime-400 to-green-600" id="group10">
+                <h3 class="text-xl font-bold mb-4">十组</h3>
+                <div class="student-list" id="studentList10"></div>
+                <div class="group-total">小组总分：<span id="groupTotal10">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-fuchsia-400 to-purple-600" id="group11">
+                <h3 class="text-xl font-bold mb-4">十一组</h3>
+                <div class="student-list" id="studentList11"></div>
+                <div class="group-total">小组总分：<span id="groupTotal11">0</span></div>
+            </div>
+            <div class="card bg-gradient-to-br from-sky-400 to-indigo-600" id="group12">
+                <h3 class="text-xl font-bold mb-4">十二组</h3>
+                <div class="student-list" id="studentList12"></div>
+                <div class="group-total">小组总分：<span id="groupTotal12">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSV文件地址（Netlify同目录下的文件，无需改路径）
+        const CSV_URL = `./score_data.csv?t=${new Date().getTime()}`;
+        
+        // 初始化小组数据
+        let allGroupData = {
+            1: { students: [], total: 0 },
+            2: { students: [], total: 0 },
+            3: { students: [], total: 0 },
+            4: { students: [], total: 0 },
+            5: { students: [], total: 0 },
+            6: { students: [], total: 0 },
+            7: { students: [], total: 0 },
+            8: { students: [], total: 0 },
+            9: { students: [], total: 0 },
+            10: { students: [], total: 0 },
+            11: { students: [], total: 0 },
+            12: { students: [], total: 0 }
+        };
+
+        // 页面加载自动刷新
+        window.onload = loadData;
+
+        // 核心：加载Netlify上的CSV数据（无跨域问题）
+        function loadData() {
+            // 重置数据
+            for (let i = 1; i <= 12; i++) {
+                allGroupData[i].students = [];
+                allGroupData[i].total = 0;
+            }
+
+            // 加载提示
+            document.getElementById('excellentList').innerHTML = '<div class="excellent-item bg-rgba(255,215,0,0.1) border-2 border-yellow-400 rounded-lg px-8 py-4 text-xl font-bold text-white min-w-[120px]">正在加载数据...</div>';
+            // 优秀个人加载提示
+            document.getElementById('excellentPersonList').innerHTML = '<div class="excellent-person-item">正在加载数据...</div>';
+            for (let i = 1; i <= 12; i++) {
+                document.getElementById(`studentList${i}`).innerHTML = '<div class="student-item text-center text-gray-400 py-4">加载中...</div>';
+                document.getElementById(`groupTotal${i}`).textContent = '0';
+            }
+
+            // 读取CSV文件（加时间戳避免缓存）
+            fetch(CSV_URL)
+                .then(res => {
+                    if (!res.ok) throw new Error(`请求失败：${res.status}（检查CSV文件是否上传）`);
+                    return res.text();
+                })
+                .then(csvText => {
+                    // 解析CSV
+                    const lines = csvText.replace(/\r/g, '').trim().split('\n');
+                    if (lines.length < 2) throw new Error('CSV文件无有效数据（至少需要表头+1行数据）');
+
+                    let validCount = 0;
+                    // 跳过表头，解析数据行
+                    lines.slice(1).forEach(line => {
+                        if (!line.trim()) return; // 跳过空行
+                        const [groupNum, name, course, homework, note] = line.split(',').map(item => item.trim().replace(/"/g, ''));
+                        
+                        // 数据验证
+                        const g = parseInt(groupNum) || 0;
+                        const c = parseInt(course) || 0;
+                        const h = parseInt(homework) || 0;
+                        const n = parseInt(note) || 0;
+                        const score = c + h + n;
+
+                        if (g >= 1 && g <= 12 && name) {
+                            allGroupData[g].students.push({
+                                name: name,
+                                course: c,
+                                homework: h,
+                                note: n,
+                                score: score,
+                                groupNum: g // 新增小组编号，方便展示
+                            });
+                            allGroupData[g].total += score;
+                            validCount++;
+                        }
+                    });
+
+                    if (validCount === 0) throw new Error('未解析到有效数据，请检查CSV列顺序：小组,姓名,课程,作业,笔记');
+                    
+                    // 渲染页面
+                    renderGroupData();
+                    selectExcellentGroups();
+                    selectExcellentPersons(); // 新增优秀个人筛选
+                    showAlert(`加载成功！共读取${validCount}条学生数据`, true);
+                })
+                .catch(err => {
+                    console.error('加载失败详情：', err);
+                    showAlert(`加载失败：${err.message}`, false);
+                    document.getElementById('excellentList').innerHTML = '<div class="excellent-item bg-rgba(255,215,0,0.1) border-2 border-yellow-400 rounded-lg px-8 py-4 text-xl font-bold text-white min-w-[120px]">加载失败</div>';
+                    document.getElementById('excellentPersonList').innerHTML = '<div class="excellent-person-item">加载失败</div>';
+                });
+        }
+
+        // 渲染小组数据到页面
+        function renderGroupData() {
+            for (let groupNum = 1; groupNum <= 12; groupNum++) {
+                const group = allGroupData[groupNum];
+                const studentListEl = document.getElementById(`studentList${groupNum}`);
+                const totalEl = document.getElementById(`groupTotal${groupNum}`);
+
+                studentListEl.innerHTML = '';
+
+                // 渲染表头
+                studentListEl.innerHTML += `
+                    <div class="student-item font-bold text-yellow-300">
+                        <div class="student-name">姓名</div>
+                        <div class="student-scores">
+                            <div class="score-item">课程</div>
+                            <div class="score-item">作业</div>
+                            <div class="score-item">笔记</div>
+                            <div class="score-item">个人分</div>
+                        </div>
+                    </div>
+                `;
+
+                // 渲染学生数据
+                if (group.students.length === 0) {
+                    studentListEl.innerHTML += `
+                        <div class="student-item text-center text-gray-400 py-4">
+                            暂无学生数据
+                        </div>
+                    `;
+                } else {
+                    group.students.forEach((student, index) => {
+                        const bgClass = index % 2 === 0 ? 'bg-rgba(255,255,255,0.05)' : '';
+                        studentListEl.innerHTML += `
+                            <div class="student-item ${bgClass}">
+                                <div class="student-name">${student.name}</div>
+                                <div class="student-scores">
+                                    <div class="score-item">${student.course}</div>
+                                    <div class="score-item">${student.homework}</div>
+                                    <div class="score-item">${student.note}</div>
+                                    <div class="score-item text-yellow-300">${student.score}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // 渲染小组总分
+                totalEl.textContent = group.total;
+            }
+        }
+
+        // 筛选并渲染优秀小组（前三名）
+        function selectExcellentGroups() {
+            const excellentList = document.getElementById('excellentList');
+            excellentList.innerHTML = '';
+
+            // 按总分排序，取前三名
+            const sortedGroups = Object.entries(allGroupData)
+                .map(([num, data]) => ({ num: parseInt(num), total: data.total }))
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 3)
+                .filter(group => group.total > 0);
+
+            // 清除之前的优秀小组标识
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.remove('excellent-card');
+                const badge = card.querySelector('.excellent-badge');
+                if (badge) badge.remove();
+            });
+
+            // 无有效数据时的提示
+            if (sortedGroups.length === 0) {
+                excellentList.innerHTML = '<div class="excellent-item bg-rgba(255,215,0,0.1) border-2 border-yellow-400 rounded-lg px-8 py-4 text-xl font-bold text-white min-w-[120px]">暂无优秀小组</div>';
+                return;
+            }
+
+            // 渲染优秀小组
+            sortedGroups.forEach((group, rank) => {
+                // 给对应小组卡片加标识
+                const card = document.getElementById(`group${group.num}`);
+                card.classList.add('excellent-card');
+                const badge = document.createElement('div');
+                badge.className = 'excellent-badge';
+                badge.textContent = `第${rank+1}名`;
+                card.appendChild(badge);
+
+                // 渲染到优秀小组区域
+                const item = document.createElement('div');
+                item.className = 'excellent-item bg-rgba(255,215,0,0.1) border-2 border-yellow-400 rounded-lg px-8 py-4 text-xl font-bold text-white min-w-[120px]';
+                item.textContent = `${group.num}组 (${group.total}分)`;
+                excellentList.appendChild(item);
+            });
+        }
+
+        // 新增：筛选并渲染优秀个人（最多5个，同分全部展示）
+        function selectExcellentPersons() {
+            const excellentPersonList = document.getElementById('excellentPersonList');
+            excellentPersonList.innerHTML = '';
+
+            // 收集所有学生数据
+            let allStudents = [];
+            for (let groupNum = 1; groupNum <= 12; groupNum++) {
+                allStudents = allStudents.concat(
+                    allGroupData[groupNum].students.map(student => ({
+                        ...student,
+                        groupNum: groupNum
+                    }))
+                );
+            }
+
+            // 过滤掉积分为0的学生
+            allStudents = allStudents.filter(student => student.score > 0);
+
+            // 无有效数据时的提示
+            if (allStudents.length === 0) {
+                excellentPersonList.innerHTML = '<div class="excellent-person-item">暂无优秀个人</div>';
+                return;
+            }
+
+            // 按积分降序排序
+            const sortedStudents = allStudents.sort((a, b) => b.score - a.score);
+
+            // 筛选优秀个人：最多5个，同分全部展示
+            let excellentPersons = [];
+            if (sortedStudents.length > 0) {
+                // 先取前5个作为基础
+                excellentPersons = sortedStudents.slice(0, 5);
+                // 获取第5个的分数（如果不足5个，取最后一个的分数）
+                const thresholdScore = excellentPersons[excellentPersons.length - 1].score;
+                // 检查后面是否有同分的学生，全部加入
+                if (sortedStudents.length > 5) {
+                    for (let i = 5; i < sortedStudents.length; i++) {
+                        if (sortedStudents[i].score === thresholdScore) {
+                            excellentPersons.push(sortedStudents[i]);
+                        } else {
+                            break; // 分数不同，停止查找
+                        }
+                    }
+                }
+            }
+
+            // 渲染优秀个人
+            if (excellentPersons.length === 0) {
+                excellentPersonList.innerHTML = '<div class="excellent-person-item">暂无优秀个人</div>';
+                return;
+            }
+
+            excellentPersons.forEach((student, index) => {
+                const item = document.createElement('div');
+                item.className = 'excellent-person-item';
+                item.innerHTML = `
+                    ${student.name} <span class="person-score">${student.score}分</span>
+                    <div class="person-group">${student.groupNum}组</div>
+                `;
+                excellentPersonList.appendChild(item);
+            });
+        }
+
+        // 提示框函数
+        function showAlert(message, isSuccess) {
+            // 移除旧提示框
+            const oldAlert = document.getElementById('alertBox');
+            if (oldAlert) oldAlert.remove();
+
+            // 创建新提示框
+            const alertBox = document.createElement('div');
+            alertBox.id = 'alertBox';
+            alertBox.style.position = 'fixed';
+            alertBox.style.top = '20px';
+            alertBox.style.left = '50%';
+            alertBox.style.transform = 'translateX(-50%)';
+            alertBox.style.padding = '12px 24px';
+            alertBox.style.borderRadius = '8px';
+            alertBox.style.color = '#fff';
+            alertBox.style.fontSize = '16px';
+            alertBox.style.zIndex = '9999';
+            alertBox.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            alertBox.style.backgroundColor = isSuccess ? '#4ade80' : '#f87171';
+            alertBox.textContent = message;
+
+            // 添加到页面
+            document.body.appendChild(alertBox);
+
+            // 3秒后自动消失
+            setTimeout(() => {
+                alertBox.style.opacity = '0';
+                alertBox.style.transition = 'opacity 0.5s';
+                setTimeout(() => alertBox.remove(), 500);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
