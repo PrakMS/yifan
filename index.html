@@ -28,9 +28,30 @@
         .card:hover {
             transform: translateY(-5px);
         }
+        /* 调整优秀小组卡片闪耀效果（降低亮度） */
         .excellent-card {
-            border: 3px solid #ffd700;
-            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+            border: 4px solid #ffd700;
+            position: relative;
+            z-index: 1;
+            /* 降低阴影亮度，减少发光强度 */
+            box-shadow: 0 0 15px #ffd700, 0 0 30px rgba(255,215,0,0.3), 0 0 45px rgba(255,215,0,0.2);
+            animation: glow-border 1.5s ease-in-out infinite alternate;
+        }
+        /* 调整渐变边框动画（降低亮度） */
+        .excellent-card::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #ffd700, #fff, #ffd700, #ff9800, #ffd700);
+            background-size: 400% 400%;
+            animation: glow-gradient 2s ease infinite;
+            z-index: -1;
+            opacity: 0.7; /* 降低透明度，减少亮度 */
+            filter: blur(1px); /* 降低模糊度，减少扩散 */
         }
         .excellent-badge {
             position: absolute;
@@ -42,8 +63,10 @@
             padding: 8px 15px;
             border-radius: 50px;
             font-size: 14px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            /* 降低徽章阴影亮度 */
+            box-shadow: 0 0 8px rgba(255,215,0,0.5);
             z-index: 10;
+            animation: glow-text 1.5s ease-in-out infinite alternate;
         }
         .student-list {
             max-height: 350px;
@@ -100,7 +123,7 @@
             font-weight: bold;
             color: #ffd700;
             margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(255,215,0,0.8);
+            text-shadow: 0 0 15px rgba(255,215,0,1);
         }
         .refresh-btn {
             background-color: #ffd700;
@@ -113,11 +136,13 @@
             cursor: pointer;
             margin: 0 auto 20px;
             display: block;
-            box-shadow: 0 4px 8px rgba(255,215,0,0.3);
+            box-shadow: 0 0 15px rgba(255,215,0,0.5);
+            transition: all 0.2s ease;
         }
         .refresh-btn:hover {
             background-color: #f5e050;
             transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255,215,0,0.8);
         }
         ::-webkit-scrollbar {
             width: 6px;
@@ -127,10 +152,11 @@
             border-radius: 3px;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(255,215,0,0.5);
+            background: rgba(255,215,0,0.8);
             border-radius: 3px;
+            box-shadow: 0 0 10px rgba(255,215,0,0.5);
         }
-        /* 新增优秀个人样式 */
+        /* 强化优秀个人样式 */
         .excellent-person-section {
             background: linear-gradient(135deg, #2d2d44 0%, #3a3a5c 100%);
             padding: 30px;
@@ -148,23 +174,132 @@
         }
         .excellent-person-item {
             background: rgba(255,215,0,0.1);
-            border: 2px solid #ffd700;
+            border: 3px solid #ffd700;
             border-radius: 10px;
             padding: 12px 20px;
             min-width: 180px;
             font-size: 16px;
             font-weight: bold;
             color: white;
-            box-shadow: 0 4px 8px rgba(255,215,0,0.2);
+            /* 降低优秀个人卡片亮度 */
+            box-shadow: 0 0 10px rgba(255,215,0,0.3), 0 0 20px rgba(255,215,0,0.2);
+            animation: glow-person 1.8s ease-in-out infinite alternate;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        /* 强化优秀个人流光效果 */
+        .excellent-person-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 2s linear infinite;
         }
         .person-score {
             color: #ffd700;
             margin-left: 8px;
+            text-shadow: 0 0 10px rgba(255,215,0,1);
         }
         .person-group {
             font-size: 14px;
             color: #ccc;
             margin-top: 5px;
+        }
+        /* 调整上榜学生样式（降低亮度） */
+        .honor-student {
+            text-shadow: 0 0 6px rgba(255,215,0,0.6);
+            border-left: 4px solid #ffd700;
+            padding-left: 8px;
+            animation: glow-student 1.5s ease-in-out infinite alternate;
+            background: rgba(255,215,0,0.03);
+        }
+        /* 调整优秀小组展示项（降低亮度） */
+        .excellent-item {
+            position: relative;
+            overflow: hidden;
+            animation: glow-border 1.5s ease-in-out infinite alternate;
+            border: 3px solid #ffd700 !important;
+            /* 降低优秀小组展示项亮度 */
+            box-shadow: 0 0 10px rgba(255,215,0,0.4);
+            z-index: 1;
+            margin: 10px;
+        }
+        .excellent-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 2.5s linear infinite;
+        }
+        
+        /* 调整动画定义（降低整体亮度） */
+        @keyframes glow-border {
+            0% {
+                box-shadow: 0 0 15px #ffd700, 0 0 30px rgba(255,215,0,0.3), 0 0 45px rgba(255,215,0,0.2);
+                border-color: #ffd700;
+            }
+            100% {
+                box-shadow: 0 0 25px #ffd700, 0 0 40px rgba(255,215,0,0.4), 0 0 60px rgba(255,215,0,0.3);
+                border-color: #fff9c4;
+            }
+        }
+        @keyframes glow-gradient {
+            0% {
+                background-position: 0% 50%;
+                opacity: 0.7;
+            }
+            50% {
+                background-position: 100% 50%;
+                opacity: 0.7;
+            }
+            100% {
+                background-position: 0% 50%;
+                opacity: 0.7;
+            }
+        }
+        @keyframes glow-text {
+            0% {
+                text-shadow: 0 0 4px rgba(26,26,46,0.8);
+                box-shadow: 0 0 8px rgba(255,215,0,0.5);
+            }
+            100% {
+                text-shadow: 0 0 8px rgba(26,26,46,1);
+                box-shadow: 0 0 15px rgba(255,215,0,0.7);
+            }
+        }
+        @keyframes glow-person {
+            0% {
+                box-shadow: 0 0 10px rgba(255,215,0,0.3), 0 0 20px rgba(255,215,0,0.2);
+                border-color: #ffd700;
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(255,215,0,0.5), 0 0 30px rgba(255,215,0,0.3);
+                border-color: #fff9c4;
+            }
+        }
+        @keyframes glow-student {
+            0% {
+                text-shadow: 0 0 6px rgba(255,215,0,0.6);
+                border-left-color: #ffd700;
+                background: rgba(255,215,0,0.03);
+            }
+            100% {
+                text-shadow: 0 0 10px rgba(255,215,0,0.8);
+                border-left-color: #fff9c4;
+                background: rgba(255,215,0,0.05);
+            }
+        }
+        @keyframes shine {
+            100% {
+                left: 100%;
+            }
         }
     </style>
 </head>
@@ -184,11 +319,11 @@
                 <li>每周按时完成课程，个人积分 +1</li>
                 <li>每周按时提交作业，个人积分 +1</li>
                 <li>每周按时分享笔记，个人积分 +1</li>
-                <li>每周完成OJ题目，个人积分 +1</li> <!-- 新增OJ规则 -->
-                <li>个人得分 = 课程完成 + 作业提交 + 笔记分享 + OJ完成</li> <!-- 修改计算规则 -->
+                <li>每周完成OJ题目，个人积分 +1</li>
+                <li>个人得分 = 课程完成 + 作业提交 + 笔记分享 + OJ完成</li>
                 <li>小组总分 = 组内所有学生的个人得分之和</li>
-                <li>积分排名前三的小组将评为「优秀小组」</li>
-                <li>前10名完成全部任务的同学将评为「优秀个人」</li>
+                <li>积分排名前三的小组将评为「优秀小组」（积分相同并列）</li>
+                <li>每周前10名全部任务都完成的同学将评为「优秀个人」</li>
             </ul>
         </div>
 
@@ -205,7 +340,7 @@
 
         <div class="excellent-section">
             <h2 class="excellent-title"><i class="fa fa-trophy mr-3"></i>优秀小组表彰</h2>
-            <p class="text-lg text-gray-200 mb-4">根据积分排名，以下小组荣获本期优秀小组称号！</p>
+            <p class="text-lg text-gray-200 mb-4">根据积分排名，以下小组荣获本期优秀小组称号！（积分相同并列）</p>
             <div id="excellentList" class="excellent-list flex flex-wrap justify-center gap-20 mt-20">
                 <div class="excellent-item bg-rgba(255,215,0,0.1) border-2 border-yellow-400 rounded-lg px-8 py-4 text-xl font-bold text-white min-w-[120px]">
                     数据加载中...
@@ -410,8 +545,8 @@
                 } else {
                     group.students.forEach((student, index) => {
                         const bgClass = index % 2 === 0 ? 'bg-rgba(255,255,255,0.05)' : '';
-                        // 表彰学生添加特殊样式
-                        const honorClass = student.isHonor === 1 ? 'text-green-400 font-bold' : '';
+                        // 表彰学生添加特殊样式（修改为honor-student类，带闪耀效果）
+                        const honorClass = student.isHonor === 1 ? 'honor-student' : '';
                         studentListEl.innerHTML += `
                             <div class="student-item ${bgClass} ${honorClass}">
                                 <div class="student-name">${student.name}${student.isHonor === 1 ? ' 🏆' : ''}</div>
@@ -432,17 +567,16 @@
             }
         }
 
-        // 筛选并渲染优秀小组（前三名）
+        // 修复：筛选并渲染优秀小组（确保显示完整前三名，含并列）
         function selectExcellentGroups() {
             const excellentList = document.getElementById('excellentList');
             excellentList.innerHTML = '';
 
-            // 按总分排序，取前三名
+            // 1. 整理所有小组数据并按总分降序排序
             const sortedGroups = Object.entries(allGroupData)
                 .map(([num, data]) => ({ num: parseInt(num), total: data.total }))
                 .sort((a, b) => b.total - a.total)
-                .slice(0, 3)
-                .filter(group => group.total > 0);
+                .filter(group => group.total > 0); // 过滤掉总分0的小组
 
             // 清除之前的优秀小组标识
             document.querySelectorAll('.card').forEach(card => {
@@ -457,22 +591,61 @@
                 return;
             }
 
-            // 渲染优秀小组
-            sortedGroups.forEach((group, rank) => {
-                // 给对应小组卡片加标识
-                const card = document.getElementById(`group${group.num}`);
-                card.classList.add('excellent-card');
-                const badge = document.createElement('div');
-                badge.className = 'excellent-badge';
-                badge.textContent = `第${rank+1}名`;
-                card.appendChild(badge);
+            // 2. 重新处理排名逻辑 - 核心修复点
+            // 步骤1：提取所有不同的分数，降序排列
+            const uniqueScores = [...new Set(sortedGroups.map(g => g.total))].sort((a, b) => b - a);
+            // 步骤2：只取前3个分数（对应1、2、3名）
+            const top3Scores = uniqueScores.slice(0, 3);
+            
+            // 步骤3：按分数分组（每个分数对应一个排名）
+            const rankMap = {};
+            top3Scores.forEach((score, index) => {
+                rankMap[score] = index + 1; // 第1个分数=第1名，第2个=第2名，第3个=第3名
+            });
 
-                // 渲染到优秀小组区域
+            // 步骤4：给每个小组标记正确的排名
+            const rankedGroups = sortedGroups.map(group => ({
+                ...group,
+                rank: rankMap[group.total] || null // 只保留前3名的小组
+            })).filter(group => group.rank !== null); // 过滤掉非前三名的小组
+
+            // 3. 按排名分组（方便渲染并列小组）
+            const rankGroups = {};
+            rankedGroups.forEach(group => {
+                if (!rankGroups[group.rank]) {
+                    rankGroups[group.rank] = [];
+                }
+                rankGroups[group.rank].push(group);
+            });
+
+            // 4. 强制按1、2、3名的顺序渲染，确保每个排名都展示
+            for (let rank = 1; rank <= 3; rank++) {
+                const groups = rankGroups[rank] || [];
+                if (groups.length === 0) continue; // 无该排名数据则跳过
+                
+                const rankText = groups.length > 1 ? `第${rank}名（并列）` : `第${rank}名`;
+                const groupText = groups.map(g => `${g.num}组 (${g.total}分)`).join('、');
+                
                 const item = document.createElement('div');
                 item.className = 'excellent-item bg-rgba(255,215,0,0.1) border-2 border-yellow-400 rounded-lg px-8 py-4 text-xl font-bold text-white min-w-[120px]';
-                item.textContent = `${group.num}组 (${group.total}分)`;
+                item.innerHTML = `${rankText}<br>${groupText}`;
                 excellentList.appendChild(item);
-            });
+
+                // 给对应小组卡片添加标识
+                groups.forEach(group => {
+                    const card = document.getElementById(`group${group.num}`);
+                    card.classList.add('excellent-card');
+                    const badge = document.createElement('div');
+                    badge.className = 'excellent-badge';
+                    badge.textContent = groups.length > 1 ? `第${rank}名（并列）` : `第${rank}名`;
+                    card.appendChild(badge);
+                });
+            }
+
+            // 兜底：如果没有任何前三数据
+            if (excellentList.children.length === 0) {
+                excellentList.innerHTML = '<div class="excellent-item bg-rgba(255,215,0,0.1) border-2 border-yellow-400 rounded-lg px-8 py-4 text-xl font-bold text-white min-w-[120px]">暂无优秀小组</div>';
+            }
         }
 
         // 修改：筛选并渲染优秀个人（只展示isHonor=1的学生，最多前10名）
@@ -509,7 +682,7 @@
                 const item = document.createElement('div');
                 item.className = 'excellent-person-item';
                 item.innerHTML = `
-                    优秀个人：${student.name} <span class="person-score">${student.score}分</span>
+                   优秀个人：${student.name} <span class="person-score">${student.score}分</span>
                     <div class="person-group">${student.groupNum}组</div>
                 `;
                 excellentPersonList.appendChild(item);
@@ -534,7 +707,7 @@
             alertBox.style.color = '#fff';
             alertBox.style.fontSize = '16px';
             alertBox.style.zIndex = '9999';
-            alertBox.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            alertBox.style.boxShadow = '0 0 15px rgba(255,215,0,0.8)';
             alertBox.style.backgroundColor = isSuccess ? '#4ade80' : '#f87171';
             alertBox.textContent = message;
 
